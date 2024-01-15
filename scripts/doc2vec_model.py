@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Optional
+from typing import Optional, Union
 from nltk.tokenize import word_tokenize
 from sklearn.metrics.pairwise import linear_kernel
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
@@ -33,12 +33,17 @@ class Doc2VecModel(SimilarityModel):
         matrix = np.array([self.model.dv[key] for key in range(len(self.docs))])
         self.sim_matrix = linear_kernel(matrix, matrix)
 
-    def get_recommendations(self, idx: int) -> list[int]:
-        sim_scores = list(enumerate(self.sim_matrix[idx]))
+    def get_recommendations(self, idx: Union[int, list[int]]) -> list[int]:
+        if isinstance(idx, int):
+            means = self.sim_matrix[idx]
+        else:
+            means = np.mean(self.sim_matrix[idx], axis=0)
+        sim_scores = list(enumerate(means))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:11]
-        indices = [i[0] for i in sim_scores]
-        return indices
+        # sim_scores = sim_scores[1:11]
+        idx = [idx] if isinstance(idx, int) else idx
+        indices = [i[0] for i in sim_scores if i[0] not in idx]
+        return indices[:10]
 
     def save_model(self, path: str):
         self.model.save(path)
