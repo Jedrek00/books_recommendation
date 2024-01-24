@@ -1,3 +1,4 @@
 *.pyc
 models/*
 app/tutorial/*
+data/sim_matrix/*
