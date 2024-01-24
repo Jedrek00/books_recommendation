@@ -1,15 +1,17 @@
+import os
 from typing import Union
 import numpy as np
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from similarity_model import SimilarityModel
+from .similarity_model import SimilarityModel
 
 class TfiDfModel(SimilarityModel):
     def __init__(self, docs: list[str]):
         super().__init__()
         self.docs = docs
         self.sim_matrix = np.array([])
+        self.matrix_name = "tfidf_sim_matrix.npy"
         self.tfidf = TfidfVectorizer(stop_words='english')
 
     def calculate_similarity(self):
@@ -27,3 +29,7 @@ class TfiDfModel(SimilarityModel):
         idx = [idx] if isinstance(idx, int) else idx
         indices = [i[0] for i in sim_scores if i[0] not in idx]
         return indices[:10]
+    
+    def save_sim_matrix(self, save_dir: str) -> None:
+        with open(os.path.join(save_dir, self.matrix_name), 'wb') as f:
+            np.save(f, self.sim_matrix)

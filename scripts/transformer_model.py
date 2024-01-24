@@ -1,22 +1,23 @@
+import os
 from typing import Optional, Union
 import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer, util
 
 
-from similarity_model import SimilarityModel
+from .similarity_model import SimilarityModel
 
 class TransformerModel(SimilarityModel):
     def __init__(self, docs: list[str], model_name: str):
         super().__init__()
         self.docs = docs
         self.sim_matrix = np.array([])
-
+        self.matrix_name = "bert_sim_matrix.npy"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"{self.device} will be used.")
         self.model = SentenceTransformer(model_name, device=self.device)
 
-    def calculate_similarity(self, pretrained_path: Optional[str] = None):
+    def calculate_similarity(self):
         self.sim_matrix = self.model.encode(self.docs, device=self.device, show_progress_bar=True, convert_to_numpy=True)
 
     def get_recommendations(self, idx: Union[int, list[int]]) -> list[int]:
@@ -34,4 +35,8 @@ class TransformerModel(SimilarityModel):
     
     def save_model(self, path: str):
         self.model.save(path)
+
+    def save_sim_matrix(self, save_dir: str) -> None:
+        with open(os.path.join(save_dir, self.matrix_name), 'wb') as f:
+            np.savez_compressed(f, self.sim_matrix)
         

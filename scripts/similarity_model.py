@@ -8,3 +8,7 @@ class SimilarityModel(ABC):
     @abstractmethod
     def get_recommendations(self, idx: int) -> list[int]:
         pass
+
+    @abstractmethod
+    def save_sim_matrix(self, save_dir: str) -> None:
+        pass

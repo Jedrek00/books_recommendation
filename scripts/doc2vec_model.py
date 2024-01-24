@@ -1,10 +1,11 @@
+import os
 import numpy as np
 from typing import Optional, Union
 from nltk.tokenize import word_tokenize
 from sklearn.metrics.pairwise import linear_kernel
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
-from similarity_model import SimilarityModel
+from .similarity_model import SimilarityModel
 
 
 class Doc2VecModel(SimilarityModel):
@@ -12,6 +13,7 @@ class Doc2VecModel(SimilarityModel):
         super().__init__()
         self.docs = docs
         self.sim_matrix = np.array([])
+        self.matrix_name = "doc2vec_sim_matrix.npy"
         self.model = Doc2Vec(
             vector_size=vector_size, alpha=alpha, min_count=min_count, epochs=epochs
         )
@@ -40,10 +42,13 @@ class Doc2VecModel(SimilarityModel):
             means = np.mean(self.sim_matrix[idx], axis=0)
         sim_scores = list(enumerate(means))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        # sim_scores = sim_scores[1:11]
         idx = [idx] if isinstance(idx, int) else idx
         indices = [i[0] for i in sim_scores if i[0] not in idx]
         return indices[:10]
 
     def save_model(self, path: str):
         self.model.save(path)
+
+    def save_sim_matrix(self, save_dir: str) -> None:
+        with open(os.path.join(save_dir, self.matrix_name), 'wb') as f:
+            np.savez_compressed(f, self.sim_matrix)
