@@ -23,7 +23,7 @@ class CollaborativeModel(SimilarityModel):
             idx = pd.Series(idx)
         for key, val in zip(idx.keys(), idx.values):
             self.reviews.loc[0, str(key)] = val
-        self.reviews = self.reviews.sub(self.reviews.mean(axis=1), axis=0).fillna(0)
+        self.reviews = self.reviews.fillna(0)
         closest_user = self.calculate_similarity()
         closest_reviews = self.docs.iloc[closest_user].squeeze()
         for key in idx.keys():
