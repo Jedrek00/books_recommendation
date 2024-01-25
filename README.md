@@ -2,6 +2,14 @@
 
 TODO add description of the project.
 
+## Run application
+
+To interact with our models we prepared a small aplication in streamlit. To run it, type following instruction:
+
+```
+streamlit run app/Find_New_Books.py 
+```
+
 ## Installation
 
 To run code from this repository poetry is required. Check if poetry is installed on your machine using command:
