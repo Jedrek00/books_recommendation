@@ -13,6 +13,7 @@ from scripts.collaborative_model import CollaborativeModel
 
 DATA_PATH = "data/processed_data.csv"
 REVIEWS_DATA_PATH =  "data/reviews.csv"
+SIM_MATRIX_PATH = "data/sim_matrix/doc2vec_sim_matrix.npy"
 COLS = ["book_title", "author", "genre", "publication_year", "summary"]
 
 st.set_page_config(
@@ -52,7 +53,7 @@ def get_reviews_data():
 st.title("Books reccomedner")
 data = load_data()
 reviews_data = get_reviews_data()
-sim_matrix = get_sim_matrix("data/sim_matrix/doc2vec_sim_matrix.npy")
+sim_matrix = get_sim_matrix(SIM_MATRIX_PATH)
 collaboartive_model = CollaborativeModel(reviews_data)
 
 titles = data["book_title"].to_list()
