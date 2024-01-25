@@ -7,11 +7,12 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from scripts.similarity_model import SimilarityModel
-from scripts.transformer_model import TransformerModel
+from scripts.merge_rankings import merge_rankings
+from scripts.collaborative_model import CollaborativeModel
 
 
 DATA_PATH = "data/processed_data.csv"
+REVIEWS_DATA_PATH =  "data/reviews.csv"
 COLS = ["book_title", "author", "genre", "publication_year", "summary"]
 
 st.set_page_config(
@@ -43,15 +44,18 @@ def get_sim_matrix(sim_matrix_path: str):
     sim_matrix = sim_matrix["arr_0"]
     return sim_matrix
 
+@st.cache_data
+def get_reviews_data():
+    return pd.read_csv(REVIEWS_DATA_PATH, sep=";", index_col=0)
+
+
 st.title("Books reccomedner")
 data = load_data()
+reviews_data = get_reviews_data()
 sim_matrix = get_sim_matrix("data/sim_matrix/doc2vec_sim_matrix.npy")
+collaboartive_model = CollaborativeModel(reviews_data)
 
 titles = data["book_title"].to_list()
-
-# selected_years = st.slider(
-#     'Select your preferences',
-#     0, 100, 50)
 
 st.markdown("### 1. Select your preferences")
 
@@ -61,7 +65,7 @@ with col1:
     st.write("Opinions")
 
 with col2:
-    selected_years = st.slider(
+    preference = st.slider(
     '<-->',
     0, 100, 50, label_visibility='hidden')
 
@@ -87,7 +91,8 @@ if show_selected:
     st.write("Selected books")
 
     selected_books = data.iloc[books_ids, :]
-
+    
+    # stylistic changes for displaing data
     selected_books["genre"] = selected_books.genre.apply(eval).str.join(", ").replace("", "-")
     selected_books["author"] = selected_books.author.fillna("Unkown")
     selected_books = selected_books.style.format(
@@ -100,16 +105,26 @@ if show_selected:
     st.dataframe(selected_books, hide_index=True)
 
 if st.button("Show reccomendations", type="primary"):
-    reccomended_ids = get_recommendations(sim_matrix, books_ids)
-    reccomended_books = data.iloc[reccomended_ids, :]
-    st.write("Recommended books")
+    # recoms based on content
+    content_recommended_ids = get_recommendations(sim_matrix, books_ids)
 
-    reccomended_books["genre"] = reccomended_books.genre.apply(eval).str.join(", ").replace("", "-")
-    reccomended_books["author"] = reccomended_books.author.fillna("Unkown")
-    filtered_data = reccomended_books.style.format(
+    # recoms based on opinions
+    my_scores = {k: 5 for k in books_ids}
+    reviews_recommended_ids = collaboartive_model.get_recommendations(my_scores)
+
+    # merged recoms
+    recommended_ids = merge_rankings(reviews_recommended_ids, content_recommended_ids, preference)
+
+    recommended_books = data.iloc[recommended_ids, :]
+    st.write("Recommended books")
+    
+    # stylistic changes for displaing data
+    recommended_books["genre"] = recommended_books.genre.apply(eval).str.join(", ").replace("", "-")
+    recommended_books["author"] = recommended_books.author.fillna("Unkown")
+    filtered_data = recommended_books.style.format(
         {
             "publication_year": lambda x: "{:,.1f}".format(x)
         },
         thousands=""
     )
-    st.dataframe(reccomended_books, hide_index=True)
+    st.dataframe(recommended_books, hide_index=True)

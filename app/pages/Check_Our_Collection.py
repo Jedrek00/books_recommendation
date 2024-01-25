@@ -10,7 +10,6 @@ st.set_page_config(
     layout="wide"
 )
 
-#st.set_page_config(layout="wide")
 
 @st.cache_data
 def load_data():
@@ -77,6 +76,7 @@ if len(selected_genres) > 0:
 if selected_years != (min_year, max_year):
     filtered_data = filtered_data[filtered_data["publication_year"].between(*selected_years)]
 
+# stylistic changes for displaing data
 filtered_data["genre"] = filtered_data.genre.apply(eval).str.join(", ").replace("", "-")
 filtered_data["author"] = filtered_data.author.fillna("Unkown")
 filtered_data = filtered_data.style.format(

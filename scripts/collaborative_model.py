@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Union
 from scipy import spatial
-from scripts.similarity_model import SimilarityModel
+
+from .similarity_model import SimilarityModel
 
 
 class CollaborativeModel(SimilarityModel):
@@ -30,3 +31,6 @@ class CollaborativeModel(SimilarityModel):
                 closest_reviews = closest_reviews.drop(labels = str(key))
         closest_reviews = closest_reviews.sort_values(ascending=False)
         return [int(key) for key in closest_reviews.keys()[:10]]
+    
+    def save_sim_matrix(self, save_dir: str) -> None:
+        return None
