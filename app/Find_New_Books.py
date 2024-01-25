@@ -62,7 +62,7 @@ st.markdown("### 1. Select your preferences")
 col1, col2, col3 = st.columns([1, 7, 1])
 
 with col1:
-    st.write("Opinions")
+    st.write("Content")
 
 with col2:
     preference = st.slider(
@@ -70,8 +70,8 @@ with col2:
     0, 100, 50, label_visibility='hidden')
 
 with col3:
-    st.write("Content")
-
+    st.write("Opinions")
+    
 
 st.markdown("### 2. Select titles")
 
